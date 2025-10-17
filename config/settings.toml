@@ -1,0 +1,22 @@
+[deepseek]
+api_key = "sk-240dea85c5b54dbbaf7e12793fdf6741"
+model = "deepseek-reasoner"
+
+[retrieval]
+search_provider = "duckduckgo"
+tavily_api_key = "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"
+
+[storage]
+persist_directory = "./.chromadb"
+
+[app]
+locale = "auto"
+default_language = "auto"
+
+[langfuse]
+enabled = true
+public_key = "pk-lf-0d248c32-6174-4138-93c5-7e81bc098d3e"
+secret_key = "sk-lf-df7e132e-2dbf-481f-aab1-77e4ebc639fb"
+host = "https://us.cloud.langfuse.com"
+environment = "development"
+release = ""
