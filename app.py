@@ -7,6 +7,29 @@ from textwrap import indent
 from agents.pipeline import FakeScopePipeline
 from agents.types import StanceLabel, VerificationTask
 
+LANGUAGE_LABELS = {"es": "Espa?ol", "en": "English"}
+
+LANG_STRINGS = {
+    "es": {
+        "verdict": "=== Veredicto ===",
+        "label": "Etiqueta",
+        "confidence": "Confianza",
+        "report": "=== Reporte ===",
+        "claims": "=== Afirmaciones ===",
+        "stance": "Postura",
+        "evidence": "  Evidencia:",
+    },
+    "en": {
+        "verdict": "=== Verdict ===",
+        "label": "Label",
+        "confidence": "Confidence",
+        "report": "=== Report ===",
+        "claims": "=== Claims ===",
+        "stance": "Stance",
+        "evidence": "  Evidence:",
+    },
+}
+
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -17,37 +40,39 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--language",
         type=str,
-        default="auto",
-        help="Language code for the input (auto for detection)",
+        choices=["es", "en"],
+        default="en",
+        help="Language code for the input and the generated output (es or en)",
     )
     return parser
 
 
-def _render(result: dict) -> str:
+def _render(result: dict, language: str) -> str:
+    strings = LANG_STRINGS.get(language, LANG_STRINGS["en"])
     verdict = result.get("verdict")
     claims = result.get("claims", [])
     report = result.get("report", "")
 
     lines = []
     if verdict:
-        lines.append("=== Verdict ===")
-        lines.append(f"Label     : {verdict.label.value.upper()}")
-        lines.append(f"Confidence: {verdict.confidence:.2f}")
+        lines.append(strings["verdict"])
+        lines.append(f"{strings['label']:<10}: {verdict.label.value.upper()}")
+        lines.append(f"{strings['confidence']:<10}: {verdict.confidence:.2f}")
         lines.append("")
     if report:
-        lines.append("=== Report ===")
+        lines.append(strings["report"])
         lines.append(report.strip())
         lines.append("")
     if claims:
-        lines.append("=== Claims ===")
+        lines.append(strings["claims"])
         for idx, claim in enumerate(claims, start=1):
             lines.append(f"Claim {idx}: {claim.text}")
             stance = claim.stance.value if isinstance(claim.stance, StanceLabel) else str(claim.stance)
             confidence = claim.confidence if claim.confidence is not None else 0.0
-            lines.append(f"  Stance     : {stance}")
-            lines.append(f"  Confidence : {confidence:.2f}")
+            lines.append(f"  {strings['stance']:<10}: {stance}")
+            lines.append(f"  {strings['confidence']:<10}: {confidence:.2f}")
             if claim.evidences:
-                lines.append("  Evidence:")
+                lines.append(strings["evidence"])
                 for evidence in claim.evidences:
                     lines.append(indent(f"- {evidence.title} ({evidence.url})", "    "))
                     snippet = evidence.snippet.strip()
@@ -71,7 +96,8 @@ def main() -> None:
 
     task = VerificationTask(input_text=args.text, url=args.url, language=args.language)
     result = asyncio.run(_ainvoke(task))
-    output = _render(result)
+    language = result.get("language", args.language)
+    output = _render(result, language)
     print(output)
 
 
