@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
@@ -73,7 +73,7 @@ class FakeScopePipeline:
             evidences[claim.identifier] = ranked
         return {"claims": claims, "evidences": evidences}
 
-    async def ainvoke(self, task: VerificationTask) -> Dict[str, Any]:
+    async def ainvoke(self, task: VerificationTask, feedback: bool | None = None) -> Dict[str, Any]:
         state: FakeScopeState = {
             "task": task,
             "run_metadata": {
@@ -90,7 +90,7 @@ class FakeScopePipeline:
             metadata=state["run_metadata"],
         )
         if trace:
-            state["run_metadata"]["trace_id"] = getattr(trace, "id", None)
+            state["run_metadata"]["trace_id"] = trace.trace_id
         try:
             result = await self.graph.ainvoke(state)
             verdict = result.get("verdict")
@@ -100,7 +100,11 @@ class FakeScopePipeline:
                 "claims": [claim.text for claim in result.get("claims", [])],
             }
             self.telemetry.log_event(trace, "verdict", output=summary)
+            if feedback is not None:
+                self.telemetry.log_score(trace, "user_feedback", feedback)
             self.telemetry.finish_trace(trace, output=summary)
+            if feedback is not None:
+                result["user_feedback"] = feedback
             return result
         except Exception as exc:  # pragma: no cover - telemetry only
             self.telemetry.finish_trace(trace, error=exc)
@@ -108,8 +112,8 @@ class FakeScopePipeline:
         finally:
             self.telemetry.flush()
 
-    def invoke(self, task: VerificationTask) -> Dict[str, Any]:
-        return asyncio.run(self.ainvoke(task))
+    def invoke(self, task: VerificationTask, feedback: bool | None = None) -> Dict[str, Any]:
+        return asyncio.run(self.ainvoke(task, feedback=feedback))
 
 
 __all__ = ["FakeScopePipeline"]
