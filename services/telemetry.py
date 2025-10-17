@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import uuid
 from datetime import UTC, datetime
@@ -14,15 +14,19 @@ try:
     from langfuse.api.resources.ingestion.types import (
         CreateEventBody,
         IngestionEvent_EventCreate,
+        IngestionEvent_ScoreCreate,
         IngestionEvent_TraceCreate,
+        ScoreBody,
         TraceBody,
     )
 except Exception:  # pragma: no cover - optional dependency
     Langfuse = None  # type: ignore
     IngestionEvent_EventCreate = None  # type: ignore
     IngestionEvent_TraceCreate = None  # type: ignore
+    IngestionEvent_ScoreCreate = None  # type: ignore
     TraceBody = None  # type: ignore
     CreateEventBody = None  # type: ignore
+    ScoreBody = None  # type: ignore
 
 
 class TelemetryTrace:
@@ -107,6 +111,41 @@ class TelemetryClient:
         )
         self._send([event])
 
+    def log_score(
+        self,
+        trace: Optional[TelemetryTrace],
+        name: str,
+        value: bool,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        if not trace:
+            return
+        self.log_score_by_id(trace.trace_id, name=name, value=value, metadata=metadata)
+
+    def log_score_by_id(
+        self,
+        trace_id: Optional[str],
+        name: str,
+        value: bool,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        if not trace_id or not self._client or not IngestionEvent_ScoreCreate:
+            return
+        now = datetime.now(UTC)
+        score_body = ScoreBody(
+            traceId=trace_id,
+            name=name,
+            value=value,
+            metadata=metadata,
+            environment=self._config.environment,
+        )
+        event = IngestionEvent_ScoreCreate(
+            id=str(uuid.uuid4()),
+            timestamp=now.isoformat(),
+            body=score_body,
+        )
+        self._send([event])
+
     def finish_trace(
         self,
         trace: Optional[TelemetryTrace],
@@ -131,7 +170,6 @@ class TelemetryClient:
         self._send([event])
 
     def flush(self) -> None:
-        # ingestion client executes immediately; nothing to flush
         return
 
     def handler(self):
