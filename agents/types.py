@@ -28,7 +28,7 @@ class Evidence:
 class Claim:
     identifier: str
     text: str
-    language: str = "auto"
+    language: str = "es"
     entities: List[str] = field(default_factory=list)
     queries: List[str] = field(default_factory=list)
     evidences: List[Evidence] = field(default_factory=list)
@@ -57,7 +57,7 @@ class Verdict:
 class VerificationTask:
     input_text: str | None = None
     url: str | None = None
-    language: str = "auto"
+    language: str = "es"
 
     def has_url(self) -> bool:
         return bool(self.url)
