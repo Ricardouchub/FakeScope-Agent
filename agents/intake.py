@@ -6,12 +6,9 @@ from typing import Any, Dict
 
 import httpx
 from bs4 import BeautifulSoup
-from langdetect import DetectorFactory, detect
 from loguru import logger
 
 from agents.types import FakeScopeState, VerificationTask
-
-DetectorFactory.seed = 42
 
 
 class IntakeAgent:
@@ -29,14 +26,7 @@ class IntakeAgent:
         for tag in soup(["script", "style", "noscript", "header", "footer", "form", "svg"]):
             tag.decompose()
         text = soup.get_text(" ", strip=True)
-        text = re.sub(r"\s+", " ", text)
-        return text.strip()
-
-    def _detect_language(self, text: str, fallback: str = "auto") -> str:
-        try:
-            return detect(text)
-        except Exception:
-            return fallback
+        return re.sub(r"\s+", " ", text).strip()
 
     async def _load_text(self, task: VerificationTask) -> str:
         if task.input_text:
@@ -51,10 +41,7 @@ class IntakeAgent:
         if not task:
             raise ValueError("Verification task missing from state")
 
-        if isinstance(task, VerificationTask):
-            load_task = task
-        else:
-            load_task = VerificationTask(**task)  # type: ignore[arg-type]
+        load_task = task if isinstance(task, VerificationTask) else VerificationTask(**task)  # type: ignore[arg-type]
 
         try:
             text = await self._load_text(load_task)
@@ -62,7 +49,7 @@ class IntakeAgent:
             logger.exception("Failed to load input text: %s", exc)
             text = load_task.input_text or ""
 
-        language = load_task.language if load_task.language != "auto" else self._detect_language(text)
+        language = load_task.language or "es"
         return {
             "normalized_text": text,
             "language": language,
