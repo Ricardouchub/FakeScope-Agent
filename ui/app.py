@@ -45,7 +45,12 @@ LANG_STRINGS = {
         "report": "Report",
         "claims": "Claims",
         "stance_line": "Stance: {label} | Confidence: {confidence:.2f}",
+        "feedback_prompt": "Was this verdict satisfactory?",
+        "feedback_submit": "Submit feedback",
+        "feedback_thanks": "Feedback recorded. Thank you!",
         "footer": "Created by Ricardo Urdaneta",
+        "feedback_yes": "Yes",
+        "feedback_no": "No",
     },
     "es": {
         "instructions_title": "Instrucciones",
@@ -75,7 +80,12 @@ LANG_STRINGS = {
         "report": "Reporte",
         "claims": "Afirmaciones",
         "stance_line": "Postura: {label} | Confianza: {confidence:.2f}",
+        "feedback_prompt": "¿El veredicto fue satisfactorio?",
+        "feedback_submit": "Guardar feedback",
+        "feedback_thanks": "¡Gracias! El feedback fue registrado.",
         "footer": "Realizado por: Ricardo Urdaneta",
+        "feedback_yes": "Sí",
+        "feedback_no": "No",
     },
 }
 
@@ -83,6 +93,8 @@ DEFAULT_LANGUAGE = "en"
 
 def get_strings(lang: str) -> dict[str, str]:
     return LANG_STRINGS.get(lang, LANG_STRINGS[DEFAULT_LANGUAGE])
+
+pipeline = FakeScopePipeline()
 
 language = st.selectbox(
     "Language",
@@ -100,8 +112,6 @@ with st.expander(strings["instructions_title"], expanded=False):
         st.markdown(f"- {step}")
     st.markdown(f"**{strings['outputs_title']}:** " + ", ".join(strings["outputs_list"]))
 
-pipeline = FakeScopePipeline()
-
 with st.form("verification-form"):
     col1, col2 = st.columns(2)
     with col1:
@@ -117,83 +127,102 @@ with st.form("verification-form"):
     submitted = st.form_submit_button(strings["submit"])
 
 if submitted:
-    strings = get_strings(language)
     if not url and not text:
         st.warning(strings["warning"])
     else:
         with st.spinner(strings["processing"]):
             task = VerificationTask(input_text=text or None, url=url or None, language=language)
             result = pipeline.invoke(task)
-        result_language = result.get("language", language)
-        strings = get_strings(result_language)
-        verdict = result.get("verdict")
-        report = result.get("report", "")
-        claims = result.get("claims", [])
-        plan = result.get("plan", {})
-        evidences = result.get("evidences", {})
-        stance_results = result.get("stance_results", {})
+        st.session_state["result"] = result
+        st.session_state["result_language"] = result.get("language", language)
+        st.session_state["trace_id"] = result.get("run_metadata", {}).get("trace_id")
 
-        st.subheader(strings["process"])
-        with st.expander(strings["planner"], expanded=False):
-            if not plan:
-                st.write(strings["no_plan"])
-            else:
-                for claim_id, queries in plan.items():
-                    st.markdown(f"**{claim_id}**")
-                    for query in queries:
-                        st.write(f"- {query}")
-        with st.expander(strings["evidence"], expanded=False):
-            if not evidences:
-                st.write(strings["no_evidence"])
-            else:
-                for claim in claims:
-                    st.markdown(f"**{claim.identifier} - {claim.text}**")
-                    for ev in evidences.get(claim.identifier, []):
-                        st.write(f"- [{ev.title}]({ev.url})")
-                        snippet = ev.snippet or ""
-                        if snippet:
-                            st.caption(snippet[:300] + ("..." if len(snippet) > 300 else ""))
-        with st.expander(strings["stance_results"], expanded=False):
-            if not stance_results:
-                st.write(strings["no_stance"])
-            else:
-                for claim in claims:
-                    assessments = stance_results.get(claim.identifier, [])
-                    st.markdown(f"**{claim.identifier} - {claim.text}**")
-                    for assessment in assessments:
-                        st.write(
-                            strings["stance_entry"].format(
-                                label=assessment.label.value,
-                                confidence=assessment.confidence,
-                                title=assessment.evidence.title,
-                            )
+result = st.session_state.get("result")
+if result:
+    result_language = st.session_state.get("result_language", language)
+    strings = get_strings(result_language)
+    verdict = result.get("verdict")
+    report = result.get("report", "")
+    claims = result.get("claims", [])
+    plan = result.get("plan", {})
+    evidences = result.get("evidences", {})
+    stance_results = result.get("stance_results", {})
+
+    st.subheader(strings["process"])
+    with st.expander(strings["planner"], expanded=False):
+        if not plan:
+            st.write(strings["no_plan"])
+        else:
+            for claim in claims:
+                st.markdown(f"**{claim.identifier} - {claim.text}**")
+                for query in plan.get(claim.identifier, []):
+                    st.write(f"- {query}")
+    with st.expander(strings["evidence"], expanded=False):
+        if not evidences:
+            st.write(strings["no_evidence"])
+        else:
+            for claim in claims:
+                st.markdown(f"**{claim.identifier} - {claim.text}**")
+                for ev in evidences.get(claim.identifier, []):
+                    st.write(f"- [{ev.title}]({ev.url})")
+                    snippet = ev.snippet or ""
+                    if snippet:
+                        st.caption(snippet[:300] + ("..." if len(snippet) > 300 else ""))
+    with st.expander(strings["stance_results"], expanded=False):
+        if not stance_results:
+            st.write(strings["no_stance"])
+        else:
+            for claim in claims:
+                assessments = stance_results.get(claim.identifier, [])
+                st.markdown(f"**{claim.identifier} - {claim.text}**")
+                for assessment in assessments:
+                    st.write(
+                        strings["stance_entry"].format(
+                            label=assessment.label.value,
+                            confidence=assessment.confidence,
+                            title=assessment.evidence.title,
                         )
+                    )
 
-        st.subheader(strings["verdict"])
-        if verdict:
-            st.metric(
-                strings["metric_label"],
-                verdict.label.value.upper(),
-                delta=strings["metric_delta"].format(value=verdict.confidence),
+    st.subheader(strings["verdict"])
+    if verdict:
+        st.metric(
+            strings["metric_label"],
+            verdict.label.value.upper(),
+            delta=strings["metric_delta"].format(value=verdict.confidence),
+        )
+
+    trace_id = st.session_state.get("trace_id")
+    if trace_id:
+        feedback_choice = st.radio(
+            strings["feedback_prompt"],
+            options=[True, False],
+            format_func=lambda value: strings["feedback_yes"] if value else strings["feedback_no"],
+            horizontal=True,
+            key="feedback_choice",
+        )
+        if st.button(strings["feedback_submit"], key="feedback_submit_button"):
+            pipeline.telemetry.log_score_by_id(trace_id, "user_feedback", bool(feedback_choice))
+            st.success(strings["feedback_thanks"])
+
+    st.subheader(strings["report"])
+    st.markdown(report)
+
+    st.subheader(strings["claims"])
+    for claim in claims:
+        st.markdown(f"**{claim.text}**")
+        st.write(
+            strings["stance_line"].format(
+                label=claim.stance.value,
+                confidence=claim.confidence or 0.0,
             )
+        )
+        for evidence in claim.evidences:
+            snippet = evidence.snippet or ""
+            suffix = "..." if len(snippet) > 200 else ""
+            st.write(f"- [{evidence.title}]({evidence.url}) - {snippet[:200]}{suffix}")
 
-        st.subheader(strings["report"])
-        st.markdown(report)
-
-        st.subheader(strings["claims"])
-        for claim in claims:
-            st.markdown(f"**{claim.text}**")
-            st.write(
-                strings["stance_line"].format(
-                    label=claim.stance.value,
-                    confidence=claim.confidence or 0.0,
-                )
-            )
-            for evidence in claim.evidences:
-                snippet = evidence.snippet or ""
-                suffix = "..." if len(snippet) > 200 else ""
-                st.write(f"- [{evidence.title}]({evidence.url}) - {snippet[:200]}{suffix}")
-
+strings = get_strings(language)
 footer = strings["footer"]
 st.markdown(
     f"""
