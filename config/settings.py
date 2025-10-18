@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
@@ -45,13 +45,11 @@ class AppConfig(BaseModel):
     enable_streamlit: bool = Field(default=True)
 
 
-class LangfuseConfig(BaseModel):
+class LangsmithConfig(BaseModel):
     enabled: bool = Field(default=False)
-    public_key: Optional[str] = None
-    secret_key: Optional[str] = None
-    host: str = Field(default="https://us.cloud.langfuse.com")
-    environment: str = Field(default="development")
-    release: Optional[str] = None
+    api_key: Optional[str] = None
+    api_url: str = Field(default="https://api.smith.langchain.com")
+    project: str = Field(default="FakeScope")
 
 
 class FakeScopeSettings(BaseSettings):
@@ -59,7 +57,7 @@ class FakeScopeSettings(BaseSettings):
     retrieval: RetrievalConfig = Field(default_factory=RetrievalConfig)
     storage: StorageConfig = Field(default_factory=StorageConfig)
     app: AppConfig = Field(default_factory=AppConfig)
-    langfuse: LangfuseConfig = Field(default_factory=LangfuseConfig)
+    langsmith: LangsmithConfig = Field(default_factory=LangsmithConfig)
 
     model_config = SettingsConfigDict(env_prefix="FAKESCOPE_", env_nested_delimiter="__", extra="ignore")
 
@@ -79,7 +77,6 @@ def get_settings() -> FakeScopeSettings:
     env_override = FakeScopeSettings()
     file_settings = FakeScopeSettings.from_file()
 
-    # Environment variables should take precedence over file-based values.
     return file_settings.model_copy(update=env_override.model_dump(exclude_unset=True))
 
 
@@ -89,6 +86,7 @@ __all__ = [
     "RetrievalConfig",
     "StorageConfig",
     "AppConfig",
-    "LangfuseConfig",
+    "LangsmithConfig",
     "get_settings",
 ]
+
