@@ -15,7 +15,6 @@ from agents.retrieval import EvidenceRetriever
 from agents.rerank import HybridReranker
 from agents.stance import StanceAnalyzer
 from agents.types import Claim, FakeScopeState, VerificationTask
-from services.telemetry import get_telemetry
 
 
 class FakeScopePipeline:
@@ -28,7 +27,6 @@ class FakeScopePipeline:
         self.stance_analyzer = StanceAnalyzer()
         self.aggregator = VerdictAggregator()
         self.report_writer = ReportWriter()
-        self.telemetry = get_telemetry()
 
         builder = StateGraph(FakeScopeState)
         builder.add_node("intake", self.intake.run)
@@ -80,37 +78,10 @@ class FakeScopePipeline:
                 "started_at": datetime.now(UTC).isoformat(),
             },
         }
-        trace = self.telemetry.start_trace(
-            name="fakescope_pipeline",
-            input={
-                "url": task.url,
-                "text_preview": (task.input_text[:300] if task.input_text else None),
-                "language": task.language,
-            },
-            metadata=state["run_metadata"],
-        )
-        if trace:
-            state["run_metadata"]["trace_id"] = trace.trace_id
-        try:
-            result = await self.graph.ainvoke(state)
-            verdict = result.get("verdict")
-            summary = {
-                "verdict": verdict.label.value if verdict else None,
-                "confidence": verdict.confidence if verdict else None,
-                "claims": [claim.text for claim in result.get("claims", [])],
-            }
-            self.telemetry.log_event(trace, "verdict", output=summary)
-            if feedback is not None:
-                self.telemetry.log_score(trace, "user_feedback", feedback)
-            self.telemetry.finish_trace(trace, output=summary)
-            if feedback is not None:
-                result["user_feedback"] = feedback
-            return result
-        except Exception as exc:  # pragma: no cover - telemetry only
-            self.telemetry.finish_trace(trace, error=exc)
-            raise
-        finally:
-            self.telemetry.flush()
+        result = await self.graph.ainvoke(state)
+        if feedback is not None:
+            result["user_feedback"] = feedback
+        return result
 
     def invoke(self, task: VerificationTask, feedback: bool | None = None) -> Dict[str, Any]:
         return asyncio.run(self.ainvoke(task, feedback=feedback))
