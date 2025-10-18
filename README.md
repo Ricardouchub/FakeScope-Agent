@@ -1,12 +1,12 @@
 ﻿# FakeScope Agent
 
-FakeScope es un agente de verificación de noticias impulsado por LangGraph y DeepSeek que extrae afirmaciones, recupera evidencia y produce un veredicto razonado. El repositorio incluye el pipeline principal, una interfaz en Streamlit y un script CLI que permiten ejecutar verificaciones locales con telemetría opcional mediante Langfuse.
+FakeScope es un agente de verificación de noticias impulsado por LangGraph y DeepSeek que extrae afirmaciones, recupera evidencia y produce un veredicto razonado. El repositorio incluye el pipeline principal, una interfaz en Streamlit y un script CLI que permiten ejecutar verificaciones locales con telemetría opcional mediante LangSmith.
 
 ## Características principales
 - Orquestación completa del pipeline con **LangGraph**.
 - Extracción de afirmaciones, planificación de consultas y recuperación híbrida (Wikipedia + buscadores externos).
 - Clasificación de postura mediante modelos NLI (DeBERTa) con heurísticas de respaldo.
-- Agregación de veredictos, reporte bilingüe (es/en) y telemetría opcional hacia Langfuse.
+- Agregación de veredictos, reporte bilingüe (es/en) y telemetría opcional hacia LangSmith.
 - UI en Streamlit y script CLI para ejecutar verificaciones locales.
 
 ## Requisitos
@@ -14,7 +14,7 @@ FakeScope es un agente de verificación de noticias impulsado por LangGraph y De
 - Claves de API opcionales:
   - `DEEPSEEK_API_KEY` para DeepSeek.
   - `TAVILY_API_KEY` si deseas habilitar Tavily; sin clave se usa DuckDuckGo por defecto.
-  - `FAKESCOPE_LANGFUSE__...` para habilitar trazas en Langfuse (ver sección de telemetría).
+  - `FAKESCOPE_LANGSMITH__...` para habilitar trazas en LangSmith (ver sección de telemetría).
 - Dependencias listadas en `requirements.txt`.
 
 ## Modo heurístico vs. NLI
@@ -33,7 +33,7 @@ El grado de confianza (0.0-1.0) representa la fortaleza del veredicto:
 - En modo NLI, procede de la probabilidad del modelo DeBERTa y se promedia entre evidencias.
 - En modo heurístico (sin NLI), se asignan valores conservadores (p. ej. 0.35 para soporte, 0.20 para desconocido), lo que refleja menor fiabilidad.
 
-La UI y la telemetría muestran esta confianza junto al veredicto (por ejemplo, "Resultado: SUPPORTS, confianza 0.72").
+La UI y la telemetría muestran esta confianza junto al veredicto (por ejemplo, “Resultado: SUPPORTS, confianza 0.72”).
 
 ## Estructura del repositorio
 ```
@@ -46,7 +46,7 @@ FakeScope-Agent/
 |   `-- settings.toml             # Valores por defecto editables para claves y opciones
 |-- services/
 |   |-- deepseek.py               # Cliente HTTP para la API de DeepSeek
-|   `-- telemetry.py              # Cliente de telemetría (Langfuse)
+|   `-- telemetry.py              # Cliente de telemetría (LangSmith)
 |-- agents/
 |   |-- intake.py                 # Normaliza la entrada (URL/texto) respetando el idioma seleccionado
 |   |-- claim_extractor.py        # Obtiene afirmaciones atómicas con DeepSeek o heurísticas
@@ -87,14 +87,13 @@ El argumento `--language` controla tanto la interpretación del artículo como e
 pytest
 ```
 
-## Telemetría (Langfuse)
-- Define credenciales en `config/settings.toml` o via variables de entorno:
-  - `FAKESCOPE_LANGFUSE__ENABLED=true`
-  - `FAKESCOPE_LANGFUSE__PUBLIC_KEY=<tu_public_key>`
-  - `FAKESCOPE_LANGFUSE__SECRET_KEY=<tu_secret_key>`
-  - Opcional: `FAKESCOPE_LANGFUSE__HOST`, `FAKESCOPE_LANGFUSE__ENVIRONMENT`, `FAKESCOPE_LANGFUSE__RELEASE`.
-- Cada ejecución del pipeline genera un trace `fakescope_pipeline` con input y veredicto.
-- Los eventos se capturan automáticamente al usar la CLI o la UI cuando `langfuse` está instalado.
+## Telemetría (LangSmith)
+- Define credenciales en `config/settings.toml` o vía variables de entorno:
+  - `FAKESCOPE_LANGSMITH__ENABLED=true`
+  - `FAKESCOPE_LANGSMITH__API_KEY=<tu_langsmith_api_key>`
+  - Opcional: `FAKESCOPE_LANGSMITH__API_URL`, `FAKESCOPE_LANGSMITH__PROJECT`.
+- Cada ejecución del pipeline genera un run en LangSmith y permite registrar feedback booleano (`user_feedback`).
+- Los eventos se capturan automáticamente al usar la CLI o la UI cuando el cliente de LangSmith está disponible.
 
 ## Ética y mejores prácticas
 - Mostrar siempre las fuentes citadas y las fechas disponibles.
