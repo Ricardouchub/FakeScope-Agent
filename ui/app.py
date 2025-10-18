@@ -45,12 +45,7 @@ LANG_STRINGS = {
         "report": "Report",
         "claims": "Claims",
         "stance_line": "Stance: {label} | Confidence: {confidence:.2f}",
-        "feedback_prompt": "Was this verdict satisfactory?",
-        "feedback_submit": "Submit feedback",
-        "feedback_thanks": "Feedback recorded. Thank you!",
         "footer": "Created by Ricardo Urdaneta",
-        "feedback_yes": "Yes",
-        "feedback_no": "No",
     },
     "es": {
         "instructions_title": "Instrucciones",
@@ -80,12 +75,7 @@ LANG_STRINGS = {
         "report": "Reporte",
         "claims": "Afirmaciones",
         "stance_line": "Postura: {label} | Confianza: {confidence:.2f}",
-        "feedback_prompt": "¿El veredicto fue satisfactorio?",
-        "feedback_submit": "Guardar feedback",
-        "feedback_thanks": "¡Gracias! El feedback fue registrado.",
         "footer": "Realizado por: Ricardo Urdaneta",
-        "feedback_yes": "Sí",
-        "feedback_no": "No",
     },
 }
 
@@ -105,6 +95,7 @@ language = st.selectbox(
 strings = get_strings(language)
 
 st.title("FakeScope")
+cl= strings["instructions_title"]
 st.caption("AI-powered fact checking with LangGraph + DeepSeek")
 
 with st.expander(strings["instructions_title"], expanded=False):
@@ -135,7 +126,6 @@ if submitted:
             result = pipeline.invoke(task)
         st.session_state["result"] = result
         st.session_state["result_language"] = result.get("language", language)
-        st.session_state["trace_id"] = result.get("run_metadata", {}).get("trace_id")
 
 result = st.session_state.get("result")
 if result:
@@ -191,19 +181,6 @@ if result:
             verdict.label.value.upper(),
             delta=strings["metric_delta"].format(value=verdict.confidence),
         )
-
-    trace_id = st.session_state.get("trace_id")
-    if trace_id:
-        feedback_choice = st.radio(
-            strings["feedback_prompt"],
-            options=[True, False],
-            format_func=lambda value: strings["feedback_yes"] if value else strings["feedback_no"],
-            horizontal=True,
-            key="feedback_choice",
-        )
-        if st.button(strings["feedback_submit"], key="feedback_submit_button"):
-            pipeline.telemetry.log_score_by_id(trace_id, "user_feedback", bool(feedback_choice))
-            st.success(strings["feedback_thanks"])
 
     st.subheader(strings["report"])
     st.markdown(report)
