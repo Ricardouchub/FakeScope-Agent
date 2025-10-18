@@ -1,4 +1,4 @@
-langgraph>=0.0.43
+﻿langgraph>=0.0.43
 httpx>=0.27.0
 pydantic>=2.7.0
 pydantic-settings>=2.2.1
@@ -20,4 +20,4 @@ loguru>=0.7.2
 pytest>=8.2.0
 ddgs>=1.0.0
 pytest-asyncio>=0.23.0
-langfuse>=2.0.0
+langsmith>=0.1.36
