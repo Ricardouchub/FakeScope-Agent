@@ -13,10 +13,8 @@ persist_directory = "./.chromadb"
 locale = "auto"
 default_language = "auto"
 
-[langfuse]
+[langsmith]
 enabled = true
-public_key = "pk-lf-0d248c32-6174-4138-93c5-7e81bc098d3e"
-secret_key = "sk-lf-df7e132e-2dbf-481f-aab1-77e4ebc639fb"
-host = "https://us.cloud.langfuse.com"
-environment = "development"
-release = ""
+api_key = "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"
+api_url = "https://api.smith.langchain.com"
+project = "FakeScope"
