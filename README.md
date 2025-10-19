@@ -1,6 +1,6 @@
 ﻿# FakeScope Agent
 
-FakeScope es un agente de verificación de noticias impulsado por LangGraph y DeepSeek que extrae afirmaciones, recupera evidencia y produce un veredicto razonado. El repositorio incluye el pipeline principal, una interfaz en Streamlit y un script CLI que permiten ejecutar verificaciones locales con telemetría opcional mediante LangSmith.
+FakeScope es un AI Agent de verificación de noticias impulsado por **LangGraph** y **DeepSeek** que extrae afirmaciones, recupera evidencia y produce un veredicto razonado. El repositorio incluye el pipeline principal, una interfaz en Streamlit y un script CLI que permiten ejecutar verificaciones locales con telemetría mediante **LangSmith**.
 
 <img width="800" src="img/FakeScope - App UI.png" alt="Main"/>
 
