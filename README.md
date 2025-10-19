@@ -116,7 +116,7 @@ pytest
 
 ## Examples
 
-### Mixed Verdict Example
+### Mixed Verdict Example from cnn.com
 <img width="700" src="img/FakeScope  - Mixed Veredict Example from CNN.png" alt="Main"/>
 
 ### Supporting Evidence
@@ -128,7 +128,7 @@ pytest
 ### LangSmith Trace
 <img width="700" src="img/FakeScope  - LangSmith Tracing Example.png" alt="Main"/>
 
-### Refuted Verdict Example
+### Refuted Verdict Example from theonion.com
 <img width="700" src="img/FakeScope - Refute example from theonion.png" alt="Main"/>
 
 ---
