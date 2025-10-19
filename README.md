@@ -129,5 +129,9 @@ FakeScope-Agent/
 - Evitar guardar datos sensibles de usuarios.
 - Informar sobre posibles sesgos o limitaciones del sistema.
 
-## Roadmap
-Consulta `AGENTS.md` para la visión completa del producto y próximos sprints.
+
+## Autor
+
+**Ricardo Urdaneta**
+
+[GitHub](https://github.com/Ricardouchub) | [LinkedIn](https://www.linkedin.com/in/ricardourdanetacastro)
