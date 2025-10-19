@@ -183,3 +183,5 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 eval/data/welfake.csv
+READMEes.md
+Instrucciones.txt
