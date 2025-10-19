@@ -94,7 +94,6 @@ pytest
 FakeScope-Agent/
 |-- app.py                        # Script CLI para ejecutar el pipeline con URL o texto
 |-- requirements.txt              # Dependencias principales del proyecto
-|-- AGENTS.md                     # Documento con la visión y la arquitectura del agente
 |-- config/
 |   |-- settings.py               # Carga y gestión de configuración (Pydantic Settings)
 |   `-- settings.toml             # Valores por defecto editables para claves y opciones
@@ -119,7 +118,7 @@ FakeScope-Agent/
 |   `-- vectorstore.py            # Helper para gestionar ChromaDB
 |-- tests/
 |   `-- test_pipeline.py          # Prueba básica que valida la ejecución del grafo
-`-- README.md                     # Documentación general y guía de uso
+`-- README.md                     # Documentación y guía de uso
 ```
 
 
