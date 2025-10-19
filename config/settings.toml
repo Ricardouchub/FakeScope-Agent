@@ -1,0 +1,20 @@
+[deepseek]
+api_key = "DEEPSEEK-API-KEY"
+model = "deepseek-reasoner"
+
+[retrieval]
+search_provider = "duckduckgo"
+tavily_api_key = "TAVILY-API-KEY"
+
+[storage]
+persist_directory = "./.chromadb"
+
+[app]
+locale = "auto"
+default_language = "auto"
+
+[langsmith]
+enabled = true
+api_key = "LANGSMITH-API-KEY"
+api_url = "https://api.smith.langchain.com"
+project = "PROJECT-NAME"
