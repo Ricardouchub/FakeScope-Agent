@@ -1,10 +1,10 @@
 [deepseek]
-api_key = "sk-240dea85c5b54dbbaf7e12793fdf6741"
+api_key = "DEEPSEEK-API-KEY"
 model = "deepseek-reasoner"
 
 [retrieval]
 search_provider = "duckduckgo"
-tavily_api_key = "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"
+tavily_api_key = "TAVILY-API-KEY"
 
 [storage]
 persist_directory = "./.chromadb"
@@ -15,6 +15,6 @@ default_language = "auto"
 
 [langsmith]
 enabled = true
-api_key = "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"
+api_key = "LANGSMITH-API-KEY"
 api_url = "https://api.smith.langchain.com"
-project = "FakeScope"
+project = "PROJECT-NAME"
