@@ -14,7 +14,7 @@ FakeScope es un agente de verificación de noticias impulsado por LangGraph y De
 - Claves de API opcionales:
   - `DEEPSEEK_API_KEY` para DeepSeek.
   - `TAVILY_API_KEY` si deseas habilitar Tavily; sin clave se usa DuckDuckGo por defecto.
-  - `FAKESCOPE_LANGSMITH__...` para habilitar trazas en LangSmith (ver sección de telemetría).
+  - `langsmith` configurado en `config/settings.toml` (ver más abajo) para habilitar trazas automáticas.
 - Dependencias listadas en `requirements.txt`.
 
 ## Modo heurístico vs. NLI
@@ -46,7 +46,7 @@ FakeScope-Agent/
 |   `-- settings.toml             # Valores por defecto editables para claves y opciones
 |-- services/
 |   |-- deepseek.py               # Cliente HTTP para la API de DeepSeek
-|   `-- telemetry.py              # Cliente de telemetría (LangSmith)
+|   `-- telemetry.py              # Cliente de telemetría (no-op; LangGraph gestiona los runs)
 |-- agents/
 |   |-- intake.py                 # Normaliza la entrada (URL/texto) respetando el idioma seleccionado
 |   |-- claim_extractor.py        # Obtiene afirmaciones atómicas con DeepSeek o heurísticas
@@ -82,18 +82,23 @@ python app.py --url https://example.com/news --language en
 ```
 El argumento `--language` controla tanto la interpretación del artículo como el idioma de salida (`es` o `en`).
 
+## Telemetría (LangSmith)
+Si habilitas LangSmith en `config/settings.toml` (sección `[langsmith]`), el loader aplicará automáticamente las variables necesarias:
+```toml
+[langsmith]
+enabled = true
+api_key = "<tu_api_key>"
+api_url = "https://api.smith.langchain.com"
+project = "FakeScope"
+```
+Esto establece `LANGSMITH_TRACING=true`, `LANGSMITH_ENDPOINT`, `LANGSMITH_API_KEY` y `LANGSMITH_PROJECT` antes de iniciar el pipeline. LangGraph se encargará de crear los runs, y podrás verlos junto con tu feedback booleano en el dashboard de LangSmith.
+
+Si prefieres configurarlas manualmente, desactiva `enabled` y exporta dichas variables en la consola antes de `streamlit run ...`.
+
 ## Pruebas
 ```bash
 pytest
 ```
-
-## Telemetría (LangSmith)
-- Define credenciales en `config/settings.toml` o vía variables de entorno:
-  - `FAKESCOPE_LANGSMITH__ENABLED=true`
-  - `FAKESCOPE_LANGSMITH__API_KEY=<tu_langsmith_api_key>`
-  - Opcional: `FAKESCOPE_LANGSMITH__API_URL`, `FAKESCOPE_LANGSMITH__PROJECT`.
-- Cada ejecución del pipeline genera un run en LangSmith y permite registrar feedback booleano (`user_feedback`).
-- Los eventos se capturan automáticamente al usar la CLI o la UI cuando el cliente de LangSmith está disponible.
 
 ## Ética y mejores prácticas
 - Mostrar siempre las fuentes citadas y las fechas disponibles.
