@@ -1,14 +1,14 @@
 # FakeScope Agent
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Status-Active-2ECC71?style=flat-square&logo=checkmarx&logoColor=white" alt="Active"/>
-  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/FastAPI-Backend-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/LangGraph-Orchestration-7E57C2?style=flat-square&logo=chainlink&logoColor=white" alt="LangGraph"/>
-  <img src="https://img.shields.io/badge/DeepSeek-Reasoning-orange?style=flat-square&logo=deepmind&logoColor=white" alt="DeepSeek"/>
-  <img src="https://img.shields.io/badge/Streamlit-UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" alt="Streamlit"/>
-  <img src="https://img.shields.io/badge/LangSmith-Telemetry-blueviolet?style=flat-square&logo=langchain&logoColor=white" alt="LangSmith"/>
-</p>
+![Status](https://img.shields.io/badge/Status-Completed-2ECC71?logo=checkmarx&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-Orchestration-7E57C2?logo=chainlink&logoColor=white)
+![DeepSeek](https://img.shields.io/badge/DeepSeek-LLM-8A2BE2?logo=deepnote&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B?logo=streamlit&logoColor=white)
+![LangSmith](https://img.shields.io/badge/LangSmith-Telemetry-7E57C2?logo=langchain&logoColor=white)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector_Store-00E676?logo=sqlite&logoColor=white)
+![DuckDuckGo](https://img.shields.io/badge/DuckDuckGo-Search-FF6600?logo=duckduckgo&logoColor=white)
+![BGE_Embedding](https://img.shields.io/badge/BGE_Embedding-SentenceTransformers-1F6FEB?logo=huggingface&logoColor=white)
 
 FakeScope is an AI Agent for automated news verification powered by **LangGraph** and **DeepSeek**. It extracts factual claims, retrieves supporting evidence, analyzes stance, and produces an explainable verdict. The repository includes the full pipeline, a **Streamlit interface**, and a **CLI utility** to run local verifications with optional telemetry via **LangSmith**.
 
