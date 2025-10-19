@@ -1,5 +1,6 @@
 ﻿from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal, Optional
@@ -66,18 +67,33 @@ class FakeScopeSettings(BaseSettings):
         if path.exists():
             with path.open("rb") as fh:
                 data = tomllib.load(fh)
-            return cls.model_validate(data)
-        return cls()
+            settings = cls.model_validate(data)
+        else:
+            settings = cls()
+        _apply_langsmith_env(settings.langsmith)
+        return settings
+
+
+def _apply_langsmith_env(config: LangsmithConfig) -> None:
+    if not config.enabled:
+        return
+    os.environ.setdefault("LANGSMITH_TRACING", "true")
+    if config.api_url:
+        os.environ.setdefault("LANGSMITH_ENDPOINT", config.api_url)
+    if config.project:
+        os.environ.setdefault("LANGSMITH_PROJECT", config.project)
+    if config.api_key:
+        os.environ.setdefault("LANGSMITH_API_KEY", config.api_key)
 
 
 @lru_cache(maxsize=1)
 def get_settings() -> FakeScopeSettings:
-    """Return a cached application settings instance."""
-
     env_override = FakeScopeSettings()
     file_settings = FakeScopeSettings.from_file()
 
-    return file_settings.model_copy(update=env_override.model_dump(exclude_unset=True))
+    merged = file_settings.model_copy(update=env_override.model_dump(exclude_unset=True))
+    _apply_langsmith_env(merged.langsmith)
+    return merged
 
 
 __all__ = [
@@ -89,4 +105,3 @@ __all__ = [
     "LangsmithConfig",
     "get_settings",
 ]
-
