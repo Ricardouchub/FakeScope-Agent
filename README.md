@@ -133,7 +133,7 @@ pytest
 
 ---
 
-## Repository Structure
+## Repos Structure
 ```
 FakeScope-Agent/
 |-- app.py                        # CLI entrypoint for local verification
