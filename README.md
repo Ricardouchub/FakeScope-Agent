@@ -107,9 +107,18 @@ You can disable automatic setup (`enabled=false`) and export environment variabl
 
 ---
 
-## Testing
-```bash
-pytest
+## Workflow
+<img width="700" src="img/agent workflow.png" alt="Main"/>
+
+```
+- Intake Agent: Receives URLs or raw text, cleans tags, deduplicates paragraphs, and detects language. Normalizes content so the extractor works with plain text and saves basic metadata such as title, date, and author if found.
+- Claim Extractor: Uses LLM to split text into atomic claims and structure them in JSON. Identifies key entities, dates, and relationships so each claim is independently verifiable and can be linked to search queries.
+- Query Planner: Takes each claim and uses DeepSeek to generate informative queries in natural language. Proposes combinations of terms, synonyms, and geographic or temporal filters. Queries are ranked by expected coverage and logged for traceability.
+- Evidence Retriever: Executes each query on Wikipedia and the approved external search engine. Applies initial BM25 filtering, discards untrusted domains, and keeps fragments with higher semantic matching. Raw content is saved with source reference and date.
+- Dense Reranker: Uses BGE-M3 embeddings to reorder candidate evidence. Combines BM25 score and cosine similarity to prioritize fragments that directly answer the claim. Limits the final collection to the most relevant passages by diversity.
+- Stance Analyzer: Evaluates each claim-evidence pair using an NLI classifier (DeBERTa or XLM-Roberta) or a few-shot prompt in DeepSeek. Labels the stance as supports, refutes, or unknown and calculates calibrated confidence with validation history.
+- Verdict Aggregator: Groups results by claim and consolidates evidence by weighting stance analyzer confidence and source quality. Calculates a global verdict by adjusting probabilities with Brier Score and ECE to improve calibration.
+- Report Writer: Uses LLM to summarize findings in a Markdown report. Explains the reasoning, highlights key evidence with citations, and communicates confidence level.
 ```
 
 ---
