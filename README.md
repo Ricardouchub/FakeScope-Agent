@@ -17,7 +17,7 @@ FakeScope is an AI Agent for automated news verification powered by **LangGraph*
 ---
 
 ## Key Features
-- End-to-end pipeline orchestration with **LangGraph**.
+- Pipeline orchestration with **LangGraph**.
 - Claim extraction, query planning, and hybrid evidence retrieval (Wikipedia + external search APIs).
 - Stance classification using **NLI models (DeBERTa)** with heuristic fallbacks.
 - Aggregated multilingual reports (English and Spanish) with optional **LangSmith telemetry**.
@@ -176,12 +176,12 @@ FakeScope-Agent/
 
 ---
 
-## Ethics and Best Practices
+## Ethics 
 - Always display sources and publication dates.  
 - Use `Unverifiable` when evidence is insufficient.  
 - Respect **robots.txt** and use official APIs only.  
 - Never store or log user-sensitive data.  
-- Be transparent about biases and limitations of the models.
+- Transparency about biases and limitations of the models.
 
 ---
 
